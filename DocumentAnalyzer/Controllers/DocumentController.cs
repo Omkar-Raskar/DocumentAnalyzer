@@ -3,7 +3,9 @@ using DocumentAnalyzer.Models;
 using DocumentAnalyzer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Pgvector;
 using System.Security.Claims;
+
 
 [ApiController]
 [Route("api/[controller]")]
@@ -65,22 +67,51 @@ public class DocumentController : ControllerBase
 
         foreach (var chunk in chunks)
         {
+            Console.WriteLine("=================================");
+            Console.WriteLine("NEW CHUNK");
+
+            if (string.IsNullOrWhiteSpace(chunk))
+            {
+                Console.WriteLine("Chunk is empty");
+                continue;
+            }
+
+            Console.WriteLine($"Chunk Length: {chunk.Length}");
+
             var embedding = await embeddingService.GetEmbedding(chunk);
+
+            if (embedding == null)
+            {
+                Console.WriteLine("Embedding is NULL");
+                continue;
+            }
+
+            //Console.WriteLine($"Embedding Count: {embedding.Count}");
+
+            //if (embedding.Count == 0)
+            //{
+            //    Console.WriteLine("Embedding is EMPTY");
+            //    continue;
+            //}
 
             var chunkEntity = new DocumentChunk
             {
                 DocumentId = document.Id,
                 Content = chunk,
-                Embedding = System.Text.Json.JsonSerializer.Serialize(embedding)
+                Embedding = new Vector(embedding.ToArray())
             };
 
             _context.DocumentChunks.Add(chunkEntity);
+
+            Console.WriteLine("Chunk Added Successfully");
         }
 
         await _context.SaveChangesAsync();
 
         return Ok(new { message = "File uploaded, chunked, and embedded successfully" });
     }
+
+    // Embedding = System.Text.Json.JsonSerializer.Serialize(embedding)
 
     //[Authorize]
     //[HttpPost("upload")]

@@ -3,6 +3,8 @@ using DocumentAnalyzer.Models;
 using DocumentAnalyzer.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -18,7 +20,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterDto dto)
+    public async Task<IActionResult> Register([FromBody] RegisterDto dto)
     {
         var user = new ApplicationUser
         {
@@ -34,11 +36,11 @@ public class AuthController : ControllerBase
         // Default role
         await _userManager.AddToRoleAsync(user, "User");
 
-        return Ok("User registered successfully");
+        return Ok(new { message = "User registered successfully" });
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginDto dto)
+    public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
         var user = await _userManager.FindByEmailAsync(dto.Email);
 
@@ -50,5 +52,19 @@ public class AuthController : ControllerBase
         var token = _tokenService.CreateToken(user, roles);
 
         return Ok(new { token });
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public IActionResult GetCurrentUser()
+    {
+        var email = User.FindFirst(ClaimTypes.Email)?.Value;
+        var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+        return Ok(new
+        {
+            email = email,
+            role = role
+        });
     }
 }

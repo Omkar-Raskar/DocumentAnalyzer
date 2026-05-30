@@ -1,4 +1,5 @@
-﻿namespace DocumentAnalyzer.Models
+﻿using Pgvector;
+namespace DocumentAnalyzer.Models
 {
     public class DocumentChunk
 {
@@ -8,7 +9,9 @@
 
     public string Content { get; set; }
 
-    public string Embedding { get; set; } // store as JSON string
+        //public string Embedding { get; set; } // store as JSON string
+
+     public Vector Embedding { get; set; }
 
     public Document Document { get; set; }
 }
