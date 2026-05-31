@@ -11,12 +11,14 @@ using Microsoft.EntityFrameworkCore;
 public class SearchController : ControllerBase
 {
     private readonly AppDbContext _context;
-    private readonly IEmbeddingService _embeddingService;
+    private readonly EmbeddingServiceFactory _factory;
 
-    public SearchController(AppDbContext context, IEmbeddingService embeddingService)
+    public SearchController(
+    AppDbContext context,
+    EmbeddingServiceFactory factory)
     {
         _context = context;
-        _embeddingService = embeddingService;
+        _factory = factory;
     }
 
     private int KeywordScore(string text, string query)
@@ -37,7 +39,11 @@ public class SearchController : ControllerBase
     public async Task<IActionResult> Search([FromBody] string query)
     {
         // Step 1: Convert query to embedding
-        var queryEmbedding = await _embeddingService.GetEmbedding(query);
+        var embeddingService =
+         _factory.GetService();
+
+        var queryEmbedding =
+            await embeddingService.GetEmbedding(query);
         var queryVector = new Vector(queryEmbedding);
 
         // Step 2: Get all chunks from DB
@@ -75,7 +81,12 @@ public class SearchController : ControllerBase
     public async Task<IActionResult> Ask([FromBody] string query)
     {
         // Step 1: Get query embedding
-        var queryEmbedding = await _embeddingService.GetEmbedding(query);
+        var embeddingService =
+         _factory.GetService();
+
+        var queryEmbedding =
+            await embeddingService.GetEmbedding(query);
+        
         var queryVector = new Vector(queryEmbedding);
 
         // Step 2: Retrieve top semantic chunks

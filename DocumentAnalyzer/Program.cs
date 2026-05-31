@@ -58,7 +58,11 @@ builder.Services.AddScoped<ChunkingService>();
 
 builder.Services.AddHttpClient<EmbeddingService>();
 
-builder.Services.AddHttpClient<IEmbeddingService, OllamaEmbeddingService>();
+builder.Services.AddHttpClient<OllamaEmbeddingService>();
+
+builder.Services.AddHttpClient<JinaEmbeddingService>();
+
+builder.Services.AddScoped<EmbeddingServiceFactory>();
 
 //builder.Services.AddHttpClient<ILLMService, OllamaLLMService>();
 

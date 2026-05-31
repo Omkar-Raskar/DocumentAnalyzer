@@ -61,7 +61,13 @@ public class DocumentController : ControllerBase
 
         // 🔥 ADD THIS PART HERE
         var chunkService = HttpContext.RequestServices.GetRequiredService<ChunkingService>();
-        var embeddingService = HttpContext.RequestServices.GetRequiredService<IEmbeddingService>();
+        var factory =
+    HttpContext.RequestServices
+        .GetRequiredService<EmbeddingServiceFactory>();
+
+        var embeddingService =
+            factory.GetService();
+        //var embeddingService = HttpContext.RequestServices.GetRequiredService<IEmbeddingService>();
 
         var chunks = chunkService.SplitText(content, 300, 75);
 
